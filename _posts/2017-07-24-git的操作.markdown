@@ -1,4 +1,4 @@
-### 1.git 操作
+﻿### 1.git 操作
 * 初始化当前目录为git目录
 `F:\work\gittest>git init`
 * 创建一个文件
