@@ -1,0 +1,429 @@
+### 1.git 操作
+* 初始化当前目录为git目录
+`F:\work\gittest>git init`
+* 创建一个文件
+`F:\work\gittest>touch a.txt`
+* 文件中输入内容
+`F:\work\gittest>echo 11111 > a.txt`
+* 查看文件内容
+`F:\work\gittest>type a.txt`
+11111
+* 
+`F:\work\gittest>git add .`
+* 
+`F:\work\gittest>git status`
+On branch master
+Initial commit
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+        new file:   a.txt
+
+---
+
+### 2.git的blob commit tree
+* 查看当前暂存区a.txt的文件内容的hash
+`F:\work\gittest>git hash-object a.txt`
+136be50fd0d354970b22aae23f086eea8ac81876
+查看文件目录多了一个13开头的文件夹
+![img](http://orkwbnlu7.bkt.clouddn.com/QQ%E5%9B%BE%E7%89%8720170724103719.png)
+* 提交到仓库 
+`F:\work\gittest>git commit -m "add a.txt"`
+[master (root-commit) 7609453] add a.txt
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.txt
+* 查看log
+`F:\work\gittest>git log`
+commit 760945308401d788b5ebc7ae9b8cfa42599cdbc5
+Author: xiaohe5096 <xiaohe5096@126.com>
+Date:   Mon Jul 24 10:40:51 2017 +0800
+
+    add a.txt
+* 使用上面的commit no 查看a.txt的commit tree( **只需要使用NO.的前几位就行**)
+`F:\work\gittest>git cat-file -p  7609453`
+tree `1c4914167683e9b92321e88175a3ba44dec22562`
+author xiaohe5096 <xiaohe5096@126.com> 1500864051 +0800
+committer xiaohe5096 <xiaohe5096@126.com> 1500864051 +0800
+add a.txt
+查看文件目录多了一个1c开头的文件夹
+![img](http://orkwbnlu7.bkt.clouddn.com/QQ%E5%9B%BE%E7%89%8720170724110504.png)
+* 查看日志
+`F:\work\gittest>git lg`
+7609453 - (HEAD -> master) add a.txt (26 minutes ago) <xiaohe5096>
+
+---
+
+### 3.配置git
+找到C:\Users\wanghaibo\.gitconfig文件
+```
+[user]
+	name = xiaohe5096
+	email = xiaohe5096@126.com
+[gui]
+	recentrepo = F:/work/git
+[color]
+	ui = true
+[alias]
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	co = commit
+	st = status -s
+
+```
+
+---
+
+### 4.git checkout 命令
+
+* add. 后提交到暂存区的内容可以撤销 注意使用checkout只能同步`modified`状态下的内容
+`F:\work\gittest>git init`
+Initialized empty Git repository in F:/work/gittest/.git/
+`F:\work\gittest>echo "111">a.txt`
+`F:\work\gittest>git add .`
+`F:\work\gittest>git status -s`
+**A  a.txt**
+`F:\work\gittest>echo "222">>a.txt`
+`F:\work\gittest>type a.txt`
+"111"
+"222"
+`F:\work\gittest>git status -s`
+**AM a.txt**
+`F:\work\gittest>git commit -m "commit"`
+[master (root-commit) 26b1a41] commit
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.txt
+`F:\work\gittest>git status`
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   a.txt
+no changes added to commit (use "git add" and/or "git commit -a")
+`F:\work\gittest>type a.txt`
+"111"
+"222"
+`F:\work\gittest>git checkout a.txt`
+`F:\work\gittest>type a.txt`
+"111"
+* 再次修改 checkout命令并不能还原Staged状态的内容
+`F:\work\gittest>echo "333">>a.txt`
+`F:\work\gittest>type a.txt`
+"111"
+"333"
+`F:\work\gittest>git add .`（状态就从Modified变成了Staged）
+`F:\work\gittest>git status -s`
+**M  a.txt**
+`F:\work\gittest>git checkout a.txt`（不起作用）
+`F:\work\gittest>type a.txt`
+"111"
+"333"
+`F:\work\gittest>git reset HEAD a.txt`（从Staged状态设置为Modified状态，也就是将这个文件从暂存区中清除）
+Unstaged changes after reset:
+**M       a.txt**
+`F:\work\gittest>git status -s`
+ M a.txt
+`F:\work\gittest>git checkout a.txt`
+`F:\work\gittest>type a.txt`（还原了）
+"111"
+
+---
+
+### git 分支
+* 提交2个版本
+`F:\work\gittest>git init`
+Initialized empty Git repository in F:/work/gittest/.git/
+`F:\work\gittest>echo "aaa">a.txt`
+`F:\work\gittest>git add .`
+`F:\work\gittest>git commit -m "init"`
+[master (root-commit) ac65c02] init
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.txt
+`F:\work\gittest>echo "a1">a1.txt`
+`F:\work\gittest>git add .`
+`F:\work\gittest>git commit -m "add a1.txt"`
+[master 0642d47] add a1.txt
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a1.txt
+`F:\work\gittest>git log --pretty=oneline`
+0642d47052e930b9c3ac121b3b6ca0a6423458a5 add a1.txt
+ac65c02b7994fcde79d42b955a2d40e8c2c6a9d1 init
+* 创建分支
+`F:\work\gittest>git branch b1`
+* 查看当前所在的分支
+`F:\work\gittest>git branch`
+  b1
+* master 
+
+---
+* 直接创建并切换分支
+`F:\work\gittest>git checkout -b b2`
+Switched to a new branch 'b2'
+`F:\work\gittest>git branch`
+  b1
+* b2
+  master
+
+---
+
+
+* 切换为b1分支
+`F:\work\gittest>git checkout b1`
+Switched to branch 'b1'
+`F:\work\gittest>git branch`
+* b1
+  master
+`F:\work\gittest>echo "222">>a.txt`
+`F:\work\gittest>type a.txt`
+"aaa"
+"222"
+`F:\work\gittest>git add .`
+`F:\work\gittest>git commit -m "add master/a.txt"`
+[master b3e55b5] add master/a.txt
+ 1 file changed, 2 insertions(+)
+`F:\work\gittest>git log --pretty=oneline`
+b3e55b59def3446da0914d231d82a78c2b861c45 add master/a.txt
+0642d47052e930b9c3ac121b3b6ca0a6423458a5 add a1.txt
+ac65c02b7994fcde79d42b955a2d40e8c2c6a9d1 init
+`F:\work\gittest>git checkout master`
+Switched to branch 'master'
+`F:\work\gittest>git log --pretty=oneline`
+56ab307dbdd7f6904b0979bf7f77252384ef0926 add master/a.txt b.txt
+**合并b1分支**
+`F:\work\gittest>git merge b1`
+Updating 56ab307..68248f5
+Fast-forward
+ a.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+`F:\work\gittest>type a.txt`
+"bi 22222"
+`F:\work\gittest>git log --pretty=oneline`
+68248f523a13e30ac82179909abcdddd4f22af00 add b1/a.txt
+56ab307dbdd7f6904b0979bf7f77252384ef0926 add master/a.txt b.txt
+最后将b1分支删除
+`F:\work\gittest>git branch -d b1`
+Deleted branch b1 (was 68248f5).
+`F:\work\gittest>git branch`
+* master
+`F:\work\gittest>git log --pretty=oneline`
+68248f523a13e30ac82179909abcdddd4f22af00 add b1/a.txt
+56ab307dbdd7f6904b0979bf7f77252384ef0926 add master/a.txt b.txt
+** 如果2个分支同时修改一个文件合并的时候会产生分支冲突**
+`F:\work\gittest>git commit -m "add b1/a.txt"`
+[b1 74f5288] add b1/a.txt
+ 1 file changed, 1 insertion(+)
+`F:\work\gittest>git log --pretty=oneline`
+74f5288dd1157962c466ba7c9a3cec7fba465418 add b1/a.txt
+0642d47052e930b9c3ac121b3b6ca0a6423458a5 add a1.txt
+ac65c02b7994fcde79d42b955a2d40e8c2c6a9d1 init
+`F:\work\gittest>git checkout master`
+Switched to branch 'master'
+`F:\work\gittest>git log --pretty=oneline`
+b3e55b59def3446da0914d231d82a78c2b861c45 add master/a.txt
+0642d47052e930b9c3ac121b3b6ca0a6423458a5 add a1.txt
+ac65c02b7994fcde79d42b955a2d40e8c2c6a9d1 init
+`F:\work\gittest>type a.txt`
+"aaa"
+"222"
+"2223"
+`F:\work\gittest>git checkout b1`
+Switched to branch 'b1'
+`F:\work\gittest>type a.txt`
+"aaa"
+"222334"
+`F:\work\gittest>git checkout master`
+Switched to branch 'master'
+`F:\work\gittest>git merge b1`
+Auto-merging a.txt
+CONFLICT (content): Merge conflict in a.txt
+Automatic merge failed; fix conflicts and then commit the result.
+`F:\work\gittest>type a.txt`
+```
+"aaa"
+<<<<<<< HEAD
+"222"
+"2223"
+=======
+"222334"
+>>>>>>> b1
+```
+
+---
+
+####git 分支管理
+* 第一个版本的操作
+```
+F:\work\gittest>git init
+Initialized empty Git repository in F:/work/gittest/.git/
+
+F:\work\gittest>echo A successful Git branching model > readme.md
+
+F:\work\gittest>git add .
+
+F:\work\gittest>git commit -m "init"
+[master (root-commit) 3c44c3c] init
+ 1 file changed, 1 insertion(+)
+ create mode 100644 readme.md
+
+F:\work\gittest>git checkout -b develop
+Switched to a new branch 'develop'
+
+F:\work\gittest>git branch
+* develop
+  master
+
+F:\work\gittest>git checkout -b feature/base develop #创建一个新分支feature/base来设置基本信息
+Switched to a new branch 'feature/base'
+
+F:\work\gittest>git branch
+  develop
+* feature/base
+  master
+
+F:\work\gittest>echo base > base.txt #添加一些文件内容
+
+F:\work\gittest>git add .
+
+F:\work\gittest>git commit -m "finish base" #完成第一个版本的提交
+[feature/base 80da90a] finish base
+ 1 file changed, 1 insertion(+)
+ create mode 100644 base.txt
+
+F:\work\gittest>git checkout develop
+Switched to branch 'develop'
+
+F:\work\gittest>git branch
+* develop
+  feature/base
+  master
+
+F:\work\gittest>git merge --no-ff feature/base #合并分支
+Merge made by the 'recursive' strategy.
+ base.txt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 base.txt
+ 
+F:\work\gittest>git branch -d feature/base #删除feature分支
+Deleted branch feature/base (was 80da90a).
+
+F:\work\gittest>git log --pretty=oneline #查看日志
+49a2cf7a625b9c593d97cd5536b97971d27ba91d Merge branch 'feature/base' into develop
+80da90a954b41919c136b29dc23a0bb47943ee18 finish base
+3c44c3cedd283daa6d4d3cb9408b317c4937d55b init
+```
+* 创建一个release分支
+```
+F:\work\gittest>git checkout -b release-0.0.1 develop
+Switched to a new branch 'release-0.0.1'
+
+F:\work\gittest>git branch
+  develop
+  master
+* release-0.0.1
+
+F:\work\gittest>mkdir rc #创建一个文件夹来说明不同版本的更新信息
+
+F:\work\gittest>echo "finish  base fun" > rc/0.0.1 #根据版本的名称创建文件来说明版本信息
+
+F:\work\gittest>git add .
+
+F:\work\gittest>git commit -m "release 0.0.1"  #提交这次release版本
+[release-0.0.1 ef6b604] release 0.0.1
+ 1 file changed, 1 insertion(+)
+ create mode 100644 rc/0.0.1
+
+F:\work\gittest>git checkout master #切换回master分支
+Switched to branch 'master'
+
+F:\work\gittest>git merge --no-ff release-0.0.1 #在master分支上合并release-0.0.1分支
+Merge made by the 'recursive' strategy.
+ base.txt | 1 +
+ rc/0.0.1 | 1 +
+ 2 files changed, 2 insertions(+)
+ create mode 100644 base.txt
+ create mode 100644 rc/0.0.1
+
+F:\work\gittest>git tag -a 0.0.1 #为该版本添加一个tag标签，说明版本的作用
+fatal: no tag message?
+```
+* 以上操作完成了一个release版本的发布
+* 将release-0.0.1分支合并到develop上
+```
+F:\work\gittest>git checkout develop
+Switched to branch 'develop'
+
+F:\work\gittest>git branch
+* develop
+  master
+  release-0.0.1
+  
+F:\work\gittest>git merge --no-ff release-0.0.1
+Merge made by the 'recursive' strategy.
+ rc/0.0.1 | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 rc/0.0.1
+
+F:\work\gittest>git branch -d release-0.0.1 #删除该分支
+Deleted branch release-0.0.1 (was ef6b604).
+# 第一个版本就成功发布
+# 每一个新的功能都要在develop分支的基础上创建feature/xx功能分支来开发
+```
+* 发现base这个版本中的代码有问题 通过创建hotfix-x.x.x分支来解决这个问题 hotfix分支都是在master基础上创建的并且都是基于tag的版本号来进行的，主要用来修复用于生产环境的分支
+```
+F:\work\gittest>git checkout -b hotfix-0.0.2 master #在master的基础上创建hotfix分支
+Switched to a new branch 'hotfix-0.0.2'
+
+F:\work\gittest>git branch
+  develop
+* hotfix-0.0.2
+  master
+
+F:\work\gittest>echo "hotfix">base.txt  #完成一次修复并且提交
+
+F:\work\gittest>git add .
+
+F:\work\gittest>git commit -m "update bug in 0.0.1"
+[hotfix-0.0.2 2388e17] update bug in 0.0.1
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+F:\work\gittest>type base.txt
+"hotfix"
+
+F:\work\gittest>git checkout master #切换到master分支
+Switched to branch 'master'
+
+F:\work\gittest>git branch
+  develop
+  hotfix-0.0.2
+* master
+
+F:\work\gittest>git merge --no-ff hotfix-0.0.2 #合并hotfix分支
+Merge made by the 'recursive' strategy.
+ base.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+F:\work\gittest>git tag -a 0.0.2 #打一个标签0.0.2
+fatal: no tag message?
+```
+* 将其合并到develop分支中并且删除hotfix分支。
+```
+F:\work\gittest>git checkout develop
+Switched to branch 'develop'
+
+F:\work\gittest>git branch
+* develop
+  hotfix-0.0.2
+  master
+
+F:\work\gittest>git merge --no-ff hotfix-0.0.2
+Merge made by the 'recursive' strategy.
+ base.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+F:\work\gittest>git branch -d hotfix-0.0.2
+Deleted branch hotfix-0.0.2 (was 2388e17).
+
+F:\work\gittest>git branch
+* develop
+  master
+
+```
